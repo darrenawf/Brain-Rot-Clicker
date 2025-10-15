@@ -19,6 +19,8 @@ public class BrainClicker : MonoBehaviour
     // New variables for 7-second intervals
     private int passiveEvery7Seconds = 0;
     private float sevenSecondTimer = 0f;
+    private bool justAddedSevenSecondBonus = false;
+    private int sevenSecondBonusAmount = 0;
 
     void Start()
     {
@@ -48,6 +50,11 @@ public class BrainClicker : MonoBehaviour
             brainRotCount += passiveEvery7Seconds;
             lifetimeBrainRot += passiveEvery7Seconds;
             sevenSecondTimer = 0f;
+            
+            // Set flag to show the spike in BPS display
+            justAddedSevenSecondBonus = true;
+            sevenSecondBonusAmount = passiveEvery7Seconds;
+            
             UpdateCounters();
         }
 
@@ -56,16 +63,36 @@ public class BrainClicker : MonoBehaviour
 
         if (!hasStartedClicking && (clickTimes.Count > 0 || passiveBPS > 0 || passiveEvery7Seconds > 0))
         {
-            // Calculate average BPS including the 7-second contributions
-            displayedBPS = clickTimes.Count + passiveBPS + (passiveEvery7Seconds / 7);
+            // Calculate BPS - if we just added the 7-second bonus, show the spike
+            if (justAddedSevenSecondBonus)
+            {
+                displayedBPS = clickTimes.Count + passiveBPS + sevenSecondBonusAmount;
+                // Reset the flag after showing it once
+                justAddedSevenSecondBonus = false;
+            }
+            else
+            {
+                displayedBPS = clickTimes.Count + passiveBPS + (passiveEvery7Seconds / 7);
+            }
+            
             UpdateCounters();
             hasStartedClicking = true;
             updateTimer = 0f;
         }
         else if (updateTimer >= 0.5f)
         {
-            // Calculate average BPS including the 7-second contributions
-            displayedBPS = clickTimes.Count + passiveBPS + (passiveEvery7Seconds / 7);
+            // Calculate BPS - if we just added the 7-second bonus, show the spike
+            if (justAddedSevenSecondBonus)
+            {
+                displayedBPS = clickTimes.Count + passiveBPS + sevenSecondBonusAmount;
+                // Reset the flag after showing it once
+                justAddedSevenSecondBonus = false;
+            }
+            else
+            {
+                displayedBPS = clickTimes.Count + passiveBPS + (passiveEvery7Seconds / 7);
+            }
+            
             UpdateCounters();
             updateTimer = 0f;
 
