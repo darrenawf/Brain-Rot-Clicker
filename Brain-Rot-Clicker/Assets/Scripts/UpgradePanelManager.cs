@@ -6,7 +6,7 @@ public class UpgradePanelManager : MonoBehaviour
 {
     [Header("Panel Settings")]
     public Transform upgradesPanel;
-    public Vector2 firstButtonPosition = new Vector2(0, -360);
+    public Vector2 firstButtonPosition = new Vector2(0, 0);
     public Vector2 buttonSize = new Vector2(150, 150);
     public float buttonSpacing = 160f;
     public int maxVisibleUpgrades = 5;

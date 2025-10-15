@@ -8,7 +8,7 @@ public class GreenFogUpgrade : Upgrade
     void Start()
     {
         upgradeName = "Green Fog";
-        cost = 3;
+        cost = 5;
         
         // Auto-find the BrainClicker if not set
         if (brainClicker == null)
