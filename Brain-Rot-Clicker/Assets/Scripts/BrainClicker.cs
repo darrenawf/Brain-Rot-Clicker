@@ -15,6 +15,10 @@ public class BrainClicker : MonoBehaviour
     private bool hasStartedClicking = false;
     private int passiveBPS = 0;
     private float passiveTimer = 0f;
+    
+    // New variables for 7-second intervals
+    private int passiveEvery7Seconds = 0;
+    private float sevenSecondTimer = 0f;
 
     void Start()
     {
@@ -27,7 +31,7 @@ public class BrainClicker : MonoBehaviour
         float currentTime = Time.time;
         clickTimes.RemoveAll(time => currentTime - time > 1f);
 
-        // Handle passive brain rot generation
+        // Handle passive brain rot generation (every second)
         passiveTimer += Time.deltaTime;
         if (passiveTimer >= 1f && passiveBPS > 0)
         {
@@ -37,23 +41,35 @@ public class BrainClicker : MonoBehaviour
             UpdateCounters();
         }
 
+        // Handle 7-second interval brain rot generation
+        sevenSecondTimer += Time.deltaTime;
+        if (sevenSecondTimer >= 7f && passiveEvery7Seconds > 0)
+        {
+            brainRotCount += passiveEvery7Seconds;
+            lifetimeBrainRot += passiveEvery7Seconds;
+            sevenSecondTimer = 0f;
+            UpdateCounters();
+        }
+
         // Update BPS display every 0.5 seconds
         updateTimer += Time.deltaTime;
 
-        if (!hasStartedClicking && (clickTimes.Count > 0 || passiveBPS > 0))
+        if (!hasStartedClicking && (clickTimes.Count > 0 || passiveBPS > 0 || passiveEvery7Seconds > 0))
         {
-            displayedBPS = clickTimes.Count + passiveBPS;
+            // Calculate average BPS including the 7-second contributions
+            displayedBPS = clickTimes.Count + passiveBPS + (passiveEvery7Seconds / 7);
             UpdateCounters();
             hasStartedClicking = true;
             updateTimer = 0f;
         }
         else if (updateTimer >= 0.5f)
         {
-            displayedBPS = clickTimes.Count + passiveBPS;
+            // Calculate average BPS including the 7-second contributions
+            displayedBPS = clickTimes.Count + passiveBPS + (passiveEvery7Seconds / 7);
             UpdateCounters();
             updateTimer = 0f;
 
-            if (clickTimes.Count == 0 && passiveBPS == 0)
+            if (clickTimes.Count == 0 && passiveBPS == 0 && passiveEvery7Seconds == 0)
             {
                 hasStartedClicking = false;
             }
@@ -71,7 +87,7 @@ public class BrainClicker : MonoBehaviour
         UpdateCounters();
     }
 
-    // Public method to add passive BPS
+    // Public method to add passive BPS (every second)
     public void AddPassiveBPS(int amount)
     {
         passiveBPS += amount;
@@ -83,6 +99,21 @@ public class BrainClicker : MonoBehaviour
     {
         passiveBPS -= amount;
         if (passiveBPS < 0) passiveBPS = 0;
+        UpdateCounters();
+    }
+
+    // NEW: Public method to add passive brain rot every 7 seconds
+    public void AddPassiveEvery7Seconds(int amount)
+    {
+        passiveEvery7Seconds += amount;
+        UpdateCounters();
+    }
+
+    // NEW: Public method to remove passive 7-second brain rot (if needed)
+    public void RemovePassiveEvery7Seconds(int amount)
+    {
+        passiveEvery7Seconds -= amount;
+        if (passiveEvery7Seconds < 0) passiveEvery7Seconds = 0;
         UpdateCounters();
     }
 
