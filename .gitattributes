@@ -1,0 +1,21 @@
+# Display C# as the main language
+*.cs linguist-language=C#
+
+# Exclude ShaderLab HLSL files
+*.shader linguist-detectable=false
+*.hlsl linguist-detectable=false
+*.cginc linguist-detectable=false
+
+# Exclude Unity files
+*.meta linguist-detectable=false
+
+# Exclude ASP.NET files
+*.aspx linguist-detectable=false
+*.ascx linguist-detectable=false
+*.master linguist-detectable=false
+*.sitemap linguist-detectable=false
+*.ashx linguist-detectable=false
+*.asmx linguist-detectable=false
+*.config linguist-detectable=false
+*.resx linguist-detectable=false
+*.webinfo linguist-detectable=false
