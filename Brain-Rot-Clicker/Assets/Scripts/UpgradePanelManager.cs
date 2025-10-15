@@ -6,7 +6,7 @@ public class UpgradePanelManager : MonoBehaviour
 {
     [Header("Panel Settings")]
     public Transform upgradesPanel;
-    public Vector2 firstButtonPosition = new Vector2(-820, -370);
+    public Vector2 firstButtonPosition = new Vector2(0, -360);
     public Vector2 buttonSize = new Vector2(150, 150);
     public float buttonSpacing = 160f;
     public int maxVisibleUpgrades = 5;
@@ -68,7 +68,7 @@ public class UpgradePanelManager : MonoBehaviour
             if (!upgrade.IsPurchased())
             {
                 upgrade.gameObject.SetActive(true);
-                PositionUpgradeButton(upgrade.gameObject, i);
+                PositionUpgradeButton(upgrade.gameObject, i, upgradesToShow);
                 activeUpgradeButtons.Add(upgrade.gameObject);
             }
         }
@@ -89,12 +89,20 @@ public class UpgradePanelManager : MonoBehaviour
         return affordable;
     }
     
-    void PositionUpgradeButton(GameObject button, int index)
+    void PositionUpgradeButton(GameObject button, int index, int totalUpgrades)
     {
         RectTransform rectTransform = button.GetComponent<RectTransform>();
         if (rectTransform != null)
         {
-            float xPos = firstButtonPosition.x + (buttonSpacing * index);
+            // Calculate the total width of all buttons
+            float totalWidth = (totalUpgrades - 1) * buttonSpacing;
+            
+            // Calculate the starting X position to center the group
+            float startX = -totalWidth / 2f;
+            
+            // Calculate the X position for this button
+            float xPos = startX + (buttonSpacing * index);
+            
             Vector2 position = new Vector2(xPos, firstButtonPosition.y);
             
             rectTransform.anchoredPosition = position;

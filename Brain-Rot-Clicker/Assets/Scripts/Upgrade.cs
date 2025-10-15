@@ -6,9 +6,7 @@ public abstract class Upgrade : MonoBehaviour
 {
     [Header("Upgrade Settings")]
     public string upgradeName;
-    public int cost;
-    public TextMeshProUGUI buttonText;
-    
+    public int cost;    
     protected BrainClicker brainClicker;
     protected Button button;
     protected bool isPurchased = false;
