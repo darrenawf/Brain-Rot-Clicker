@@ -1622,6 +1622,7 @@ GameObject:
   - component: {fileID: 1202498052}
   - component: {fileID: 1202498055}
   - component: {fileID: 1202498054}
+  - component: {fileID: 1202498056}
   - component: {fileID: 1202498053}
   m_Layer: 5
   m_Name: ClickCounterButton
@@ -1732,6 +1733,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1202498051}
   m_CullTransparentMesh: 1
+--- !u!114 &1202498056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202498051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61b999d799dc6e34e9baf541660e14ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  upgradeName: 
+  cost: 0
+  clickTextPrefab: {fileID: 855587113}
 --- !u!1 &1237453023
 GameObject:
   m_ObjectHideFlags: 0
@@ -2634,7 +2650,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Cost 50
+  m_text: Cost 25
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f6ed4a6d17bf912449ccdabc75b5df0d, type: 2}
   m_sharedMaterial: {fileID: -5222765637203029985, guid: f6ed4a6d17bf912449ccdabc75b5df0d, type: 2}

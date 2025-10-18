@@ -138,6 +138,7 @@ public class BrainClicker : MonoBehaviour
 
     void SpawnClickAnimation()
     {
+        // Only spawn animation if the prefab is assigned (upgrade purchased)
         if (clickTextPrefab != null)
         {
             // Instantiate the animation prefab
