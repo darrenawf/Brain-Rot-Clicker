@@ -8,6 +8,7 @@ public class BrainClicker : MonoBehaviour
     public int lifetimeBrainRot = 0;
     public TextMeshProUGUI counterText;
     public TextMeshProUGUI bpsText;
+    public GameObject clickTextPrefab; // Reference to your ClickTextAnimation prefab
 
     private List<float> clickTimes = new List<float>();
     private float updateTimer = 0f;
@@ -126,10 +127,51 @@ public class BrainClicker : MonoBehaviour
         // Record the time of this click
         clickTimes.Add(Time.time);
 
+        // Spawn animation
+        SpawnClickAnimation();
+
         // Start click animation
         StartCoroutine(ClickAnimation());
 
         UpdateCounters();
+    }
+
+    void SpawnClickAnimation()
+    {
+        if (clickTextPrefab != null)
+        {
+            // Spawn at (0,0,0)
+            Vector3 spawnPosition = Vector3.zero;
+            
+            // Instantiate the animation prefab
+            GameObject animationInstance = Instantiate(clickTextPrefab, spawnPosition, Quaternion.identity);
+            
+            // Make sure the instance is enabled
+            animationInstance.SetActive(true);
+            
+            // Set the text
+            TextMeshProUGUI textComponent = animationInstance.GetComponent<TextMeshProUGUI>();
+            if (textComponent != null)
+            {
+                textComponent.text = "+1";
+                textComponent.fontSize = 40;
+                textComponent.fontStyle = FontStyles.Bold;
+            }
+            
+            // Make sure it's visible in the Canvas
+            Canvas canvas = FindObjectOfType<Canvas>();
+            if (canvas != null)
+            {
+                animationInstance.transform.SetParent(canvas.transform, false);
+                
+                // Set position within canvas
+                RectTransform rectTransform = animationInstance.GetComponent<RectTransform>();
+                if (rectTransform != null)
+                {
+                    rectTransform.anchoredPosition = Vector2.zero;
+                }
+            }
+        }
     }
 
     void OnMouseEnter()
