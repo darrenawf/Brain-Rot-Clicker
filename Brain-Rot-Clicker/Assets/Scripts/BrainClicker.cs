@@ -16,7 +16,7 @@ public class BrainClicker : MonoBehaviour
     private bool hasStartedClicking = false;
     private int passiveBPS = 0;
     private float passiveTimer = 0f;
-    
+
     // New variables for 7-second intervals
     private int passiveEvery7Seconds = 0;
     private float sevenSecondTimer = 0f;
@@ -66,11 +66,11 @@ public class BrainClicker : MonoBehaviour
             brainRotCount += passiveEvery7Seconds;
             lifetimeBrainRot += passiveEvery7Seconds;
             sevenSecondTimer = 0f;
-            
+
             // Set flag to show the spike in BPS display
             justAddedSevenSecondBonus = true;
             sevenSecondBonusAmount = passiveEvery7Seconds;
-            
+
             UpdateCounters();
         }
 
@@ -90,7 +90,7 @@ public class BrainClicker : MonoBehaviour
             {
                 displayedBPS = clickTimes.Count + passiveBPS + (passiveEvery7Seconds / 7);
             }
-            
+
             UpdateCounters();
             hasStartedClicking = true;
             updateTimer = 0f;
@@ -108,7 +108,7 @@ public class BrainClicker : MonoBehaviour
             {
                 displayedBPS = clickTimes.Count + passiveBPS + (passiveEvery7Seconds / 7);
             }
-            
+
             UpdateCounters();
             updateTimer = 0f;
 
@@ -140,15 +140,12 @@ public class BrainClicker : MonoBehaviour
     {
         if (clickTextPrefab != null)
         {
-            // Spawn at (0,0,0)
-            Vector3 spawnPosition = Vector3.zero;
-            
             // Instantiate the animation prefab
-            GameObject animationInstance = Instantiate(clickTextPrefab, spawnPosition, Quaternion.identity);
-            
+            GameObject animationInstance = Instantiate(clickTextPrefab, Vector3.zero, Quaternion.identity);
+
             // Make sure the instance is enabled
             animationInstance.SetActive(true);
-            
+
             // Set the text
             TextMeshProUGUI textComponent = animationInstance.GetComponent<TextMeshProUGUI>();
             if (textComponent != null)
@@ -157,18 +154,20 @@ public class BrainClicker : MonoBehaviour
                 textComponent.fontSize = 40;
                 textComponent.fontStyle = FontStyles.Bold;
             }
-            
+
             // Make sure it's visible in the Canvas
             Canvas canvas = FindObjectOfType<Canvas>();
             if (canvas != null)
             {
                 animationInstance.transform.SetParent(canvas.transform, false);
-                
-                // Set position within canvas
+
+                // Set random position above center: x from -250 to 250, y from 250 to 350
                 RectTransform rectTransform = animationInstance.GetComponent<RectTransform>();
                 if (rectTransform != null)
                 {
-                    rectTransform.anchoredPosition = Vector2.zero;
+                    float randomX = Random.Range(-250f, 250f);
+                    float randomY = Random.Range(250f, 350f);
+                    rectTransform.anchoredPosition = new Vector2(randomX, randomY);
                 }
             }
         }
@@ -196,7 +195,7 @@ public class BrainClicker : MonoBehaviour
     private System.Collections.IEnumerator ClickAnimation()
     {
         isAnimating = true;
-        
+
         Vector3 targetScale = originalScale * clickScaleFactor;
         float elapsedTime = 0f;
 
@@ -228,7 +227,7 @@ public class BrainClicker : MonoBehaviour
     private System.Collections.IEnumerator HoverAnimation(bool hoverIn)
     {
         isAnimating = true;
-        
+
         Vector3 startScale = transform.localScale;
         Vector3 targetScale = hoverIn ? hoverScale : originalScale;
         float elapsedTime = 0f;
