@@ -22,8 +22,23 @@ public class BrainClicker : MonoBehaviour
     private bool justAddedSevenSecondBonus = false;
     private int sevenSecondBonusAmount = 0;
 
+    // Animation variables
+    private Vector3 originalScale;
+    private Vector3 hoverScale;
+    private bool isAnimating = false;
+    private bool isHovering = false;
+
+    // Animation settings (you can adjust these in the Inspector)
+    public float clickScaleFactor = 0.8f;
+    public float hoverScaleFactor = 1.1f;
+    public float clickAnimationDuration = 0.1f;
+    public float hoverAnimationDuration = 0.2f;
+
     void Start()
     {
+        // Store original scale and calculate hover scale
+        originalScale = transform.localScale;
+        hoverScale = originalScale * hoverScaleFactor;
         UpdateCounters();
     }
 
@@ -111,7 +126,80 @@ public class BrainClicker : MonoBehaviour
         // Record the time of this click
         clickTimes.Add(Time.time);
 
+        // Start click animation
+        StartCoroutine(ClickAnimation());
+
         UpdateCounters();
+    }
+
+    void OnMouseEnter()
+    {
+        if (!isAnimating)
+        {
+            isHovering = true;
+            StartCoroutine(HoverAnimation(true));
+        }
+    }
+
+    void OnMouseExit()
+    {
+        if (isHovering)
+        {
+            isHovering = false;
+            StartCoroutine(HoverAnimation(false));
+        }
+    }
+
+    // Click animation coroutine
+    private System.Collections.IEnumerator ClickAnimation()
+    {
+        isAnimating = true;
+        
+        Vector3 targetScale = originalScale * clickScaleFactor;
+        float elapsedTime = 0f;
+
+        // Scale down
+        while (elapsedTime < clickAnimationDuration / 2f)
+        {
+            transform.localScale = Vector3.Lerp(originalScale, targetScale, elapsedTime / (clickAnimationDuration / 2f));
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.localScale = targetScale;
+        elapsedTime = 0f;
+
+        // Scale back up
+        Vector3 endScale = isHovering ? hoverScale : originalScale;
+        while (elapsedTime < clickAnimationDuration / 2f)
+        {
+            transform.localScale = Vector3.Lerp(targetScale, endScale, elapsedTime / (clickAnimationDuration / 2f));
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.localScale = endScale;
+        isAnimating = false;
+    }
+
+    // Hover animation coroutine
+    private System.Collections.IEnumerator HoverAnimation(bool hoverIn)
+    {
+        isAnimating = true;
+        
+        Vector3 startScale = transform.localScale;
+        Vector3 targetScale = hoverIn ? hoverScale : originalScale;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < hoverAnimationDuration)
+        {
+            transform.localScale = Vector3.Lerp(startScale, targetScale, elapsedTime / hoverAnimationDuration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.localScale = targetScale;
+        isAnimating = false;
     }
 
     // Public method to add passive BPS (every second)
