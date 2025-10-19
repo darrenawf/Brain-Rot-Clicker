@@ -19,11 +19,14 @@ public class BrainClicker : MonoBehaviour
     private int passiveBPS = 0;
     private float passiveTimer = 0f;
 
-    // New variables for 7-second intervals
-    private int passiveEvery7Seconds = 0;
-    private float sevenSecondTimer = 0f;
-    private bool justAddedSevenSecondBonus = false;
-    private int sevenSecondBonusAmount = 0;
+    // Updated variables for 10-second intervals
+    private int passiveEvery10Seconds = 0;
+    private float tenSecondTimer = 0f;
+    private bool justAddedTenSecondBonus = false;
+    private int tenSecondBonusAmount = 0;
+
+    // Bell upgrade system
+    private List<BellUpgrade> bellUpgrades = new List<BellUpgrade>();
 
     // Click multiplier variables
     private int clickMultiplier = 1;
@@ -89,16 +92,19 @@ public class BrainClicker : MonoBehaviour
             UpdateCounters();
         }
 
-        // Handle 7-second interval brain rot generation
-        sevenSecondTimer += Time.deltaTime;
-        if (sevenSecondTimer >= 7f && passiveEvery7Seconds > 0)
+        // Handle 10-second interval brain rot generation
+        tenSecondTimer += Time.deltaTime;
+        if (tenSecondTimer >= 10f && passiveEvery10Seconds > 0)
         {
-            brainRotCount += passiveEvery7Seconds;
-            lifetimeBrainRot += passiveEvery7Seconds;
-            sevenSecondTimer = 0f;
+            brainRotCount += passiveEvery10Seconds;
+            lifetimeBrainRot += passiveEvery10Seconds;
+            tenSecondTimer = 0f;
 
-            justAddedSevenSecondBonus = true;
-            sevenSecondBonusAmount = passiveEvery7Seconds;
+            justAddedTenSecondBonus = true;
+            tenSecondBonusAmount = passiveEvery10Seconds;
+
+            // Play bell sounds for all purchased bell upgrades
+            PlayBellSounds();
 
             UpdateCounters();
         }
@@ -106,7 +112,7 @@ public class BrainClicker : MonoBehaviour
         // Update BPS display every 0.5 seconds
         updateTimer += Time.deltaTime;
 
-        if (!hasStartedClicking && (clickTimes.Count > 0 || passiveBPS > 0 || passiveEvery7Seconds > 0))
+        if (!hasStartedClicking && (clickTimes.Count > 0 || passiveBPS > 0 || passiveEvery10Seconds > 0))
         {
             displayedBPS = CalculateCurrentBPS();
             UpdateCounters();
@@ -119,7 +125,7 @@ public class BrainClicker : MonoBehaviour
             UpdateCounters();
             updateTimer = 0f;
 
-            if (clickTimes.Count == 0 && passiveBPS == 0 && passiveEvery7Seconds == 0)
+            if (clickTimes.Count == 0 && passiveBPS == 0 && passiveEvery10Seconds == 0)
             {
                 hasStartedClicking = false;
             }
@@ -241,6 +247,27 @@ public class BrainClicker : MonoBehaviour
         Debug.Log("Added fixed chance: " + amount + " with " + (chance * 100) + "% chance");
     }
 
+    // Method to register bell upgrade
+    public void RegisterBellUpgrade(BellUpgrade bellUpgrade)
+    {
+        if (!bellUpgrades.Contains(bellUpgrade))
+        {
+            bellUpgrades.Add(bellUpgrade);
+        }
+    }
+
+    // Method to play all bell sounds
+    private void PlayBellSounds()
+    {
+        foreach (BellUpgrade bellUpgrade in bellUpgrades)
+        {
+            if (bellUpgrade != null && bellUpgrade.IsPurchased())
+            {
+                bellUpgrade.PlayBellSound();
+            }
+        }
+    }
+
     // Calculate BPS including fixed chance averages
     private int CalculateCurrentBPS()
     {
@@ -265,12 +292,13 @@ public class BrainClicker : MonoBehaviour
         // Adjust base BPS for the chance that clicks are replaced by fixed amounts
         int adjustedBaseBPS = Mathf.RoundToInt(clickTimes.Count * clickMultiplier * (1f - totalFixedChance));
 
-        int totalBPS = adjustedBaseBPS + averageFixedBPS + passiveBPS + (passiveEvery7Seconds / 7);
+        // Include 10-second passive in BPS calculation (divided by 10 instead of 7)
+        int totalBPS = adjustedBaseBPS + averageFixedBPS + passiveBPS + (passiveEvery10Seconds / 10);
 
-        if (justAddedSevenSecondBonus)
+        if (justAddedTenSecondBonus)
         {
-            totalBPS += sevenSecondBonusAmount;
-            justAddedSevenSecondBonus = false;
+            totalBPS += tenSecondBonusAmount;
+            justAddedTenSecondBonus = false;
         }
 
         return totalBPS;
@@ -303,6 +331,21 @@ public class BrainClicker : MonoBehaviour
     public int GetClickMultiplier()
     {
         return clickMultiplier;
+    }
+
+    // Method to add passive every 10 seconds
+    public void AddPassiveEvery10Seconds(int amount)
+    {
+        passiveEvery10Seconds += amount;
+        UpdateCounters();
+    }
+
+    // Method to remove passive every 10 seconds
+    public void RemovePassiveEvery10Seconds(int amount)
+    {
+        passiveEvery10Seconds -= amount;
+        if (passiveEvery10Seconds < 0) passiveEvery10Seconds = 0;
+        UpdateCounters();
     }
 
     // Click animation coroutine
@@ -365,19 +408,6 @@ public class BrainClicker : MonoBehaviour
     {
         passiveBPS -= amount;
         if (passiveBPS < 0) passiveBPS = 0;
-        UpdateCounters();
-    }
-
-    public void AddPassiveEvery7Seconds(int amount)
-    {
-        passiveEvery7Seconds += amount;
-        UpdateCounters();
-    }
-
-    public void RemovePassiveEvery7Seconds(int amount)
-    {
-        passiveEvery7Seconds -= amount;
-        if (passiveEvery7Seconds < 0) passiveEvery7Seconds = 0;
         UpdateCounters();
     }
 
