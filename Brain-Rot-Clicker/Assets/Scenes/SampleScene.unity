@@ -676,7 +676,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +30 brain rot per 10 seconds
+  m_text: +40 brain rot per 10 seconds
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f6ed4a6d17bf912449ccdabc75b5df0d, type: 2}
   m_sharedMaterial: {fileID: -5222765637203029985, guid: f6ed4a6d17bf912449ccdabc75b5df0d, type: 2}
@@ -5170,7 +5170,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: +2 brain rot per second
+  m_text: +3 brain rot per second
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f6ed4a6d17bf912449ccdabc75b5df0d, type: 2}
   m_sharedMaterial: {fileID: -5222765637203029985, guid: f6ed4a6d17bf912449ccdabc75b5df0d, type: 2}

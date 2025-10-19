@@ -48,7 +48,7 @@ public class LofiMusicUpgrade : Upgrade
         // Add +3 passive brain rot per second
         if (brainClicker != null)
         {
-            brainClicker.AddPassiveBPS(2);
+            brainClicker.AddPassiveBPS(3);
         }
         
         // Start playing the lofi music

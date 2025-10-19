@@ -5,7 +5,7 @@ public class BellUpgrade : Upgrade
     [Header("Bell Settings")]
     public AudioSource bellSound; // Drag an AudioSource for the bell sound here
     
-    private int bellAmount = 30;
+    private int bellAmount = 40;
     
     void Start()
     {
@@ -27,7 +27,7 @@ public class BellUpgrade : Upgrade
     
     protected override void ApplyUpgrade()
     {
-        Debug.Log("Bell Upgrade purchased! +30 brain rot every 10 seconds with bell sound");
+        Debug.Log("Bell Upgrade purchased! +40 brain rot every 10 seconds with bell sound");
         
         // Add +20 brain rot every 10 seconds
         if (brainClicker != null)
