@@ -229,8 +229,9 @@ public class BrainClicker : MonoBehaviour
                 RectTransform rectTransform = animationInstance.GetComponent<RectTransform>();
                 if (rectTransform != null)
                 {
-                    float randomX = Random.Range(-250f, 250f);
-                    float randomY = Random.Range(250f, 350f);
+                    // Updated x-coordinate range: -500 to 100 (keeping y the same)
+                    float randomX = Random.Range(-460f, 80f);
+                    float randomY = Random.Range(220f, 320f);
                     rectTransform.anchoredPosition = new Vector2(randomX, randomY);
                 }
             }

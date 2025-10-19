@@ -8,7 +8,7 @@ public class UpgradePanelManager : MonoBehaviour
     public Transform upgradesPanel;
     public Vector2 firstButtonPosition = new Vector2(0, 0);
     public Vector2 buttonSize = new Vector2(150, 150);
-    public float buttonSpacing = 200f;
+    public float buttonSpacing = 160f;
     public int maxVisibleUpgrades = 5;
     
     private List<Upgrade> allUpgrades = new List<Upgrade>();
@@ -68,7 +68,7 @@ public class UpgradePanelManager : MonoBehaviour
             if (!upgrade.IsPurchased())
             {
                 upgrade.gameObject.SetActive(true);
-                PositionUpgradeButton(upgrade.gameObject, i, upgradesToShow);
+                PositionUpgradeButton(upgrade.gameObject, i);
                 activeUpgradeButtons.Add(upgrade.gameObject);
             }
         }
@@ -80,7 +80,8 @@ public class UpgradePanelManager : MonoBehaviour
         
         foreach (Upgrade upgrade in allUpgrades)
         {
-            if (brainClicker.lifetimeBrainRot >= upgrade.cost && !upgrade.IsPurchased())
+            // Changed from 1/2 (50%) to 2/5 (40%) of lifetime brain rot
+            if (brainClicker.lifetimeBrainRot >= upgrade.cost * 0.4f && !upgrade.IsPurchased())
             {
                 affordable.Add(upgrade);
             }
@@ -89,21 +90,15 @@ public class UpgradePanelManager : MonoBehaviour
         return affordable;
     }
     
-    void PositionUpgradeButton(GameObject button, int index, int totalUpgrades)
+    void PositionUpgradeButton(GameObject button, int index)
     {
         RectTransform rectTransform = button.GetComponent<RectTransform>();
         if (rectTransform != null)
         {
-            // Calculate the total height of all buttons
-            float totalHeight = (totalUpgrades - 1) * buttonSpacing;
+            // First button stays at firstButtonPosition, subsequent buttons go underneath
+            float yPos = firstButtonPosition.y - (buttonSpacing * index);
             
-            // Calculate the starting Y position (top of the screen)
-            float startY = totalHeight / 2f;
-            
-            // Calculate the Y position for this button (cheapest on top, going downward)
-            float yPos = startY - (buttonSpacing * index);
-            
-            // Position on the right side of the screen
+            // Use the same X position for all buttons
             Vector2 position = new Vector2(firstButtonPosition.x, yPos);
             
             rectTransform.anchoredPosition = position;
