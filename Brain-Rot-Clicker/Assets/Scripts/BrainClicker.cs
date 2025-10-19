@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 
 public class BrainClicker : MonoBehaviour
@@ -30,6 +31,9 @@ public class BrainClicker : MonoBehaviour
     // Fixed amount chance variables
     private List<FixedClickChance> fixedChances = new List<FixedClickChance>();
 
+    // Sound system
+    public static List<SoundUpgrade> soundUpgrades = new List<SoundUpgrade>();
+
     // Animation variables
     private Vector3 originalScale;
     private Vector3 hoverScale;
@@ -48,7 +52,7 @@ public class BrainClicker : MonoBehaviour
     {
         public int fixedAmount;
         public float chance;
-        
+
         public FixedClickChance(int amount, float chancePercent)
         {
             fixedAmount = amount;
@@ -60,6 +64,10 @@ public class BrainClicker : MonoBehaviour
     {
         originalScale = transform.localScale;
         hoverScale = originalScale * hoverScaleFactor;
+
+        // Initialize sound upgrades list
+        soundUpgrades = new List<SoundUpgrade>();
+
         UpdateCounters();
     }
 
@@ -119,11 +127,11 @@ public class BrainClicker : MonoBehaviour
     void OnMouseDown()
     {
         int clickAmount = clickMultiplier;
-        
+
         // Check for fixed amount chances (replace the click amount if triggered)
         bool fixedAmountTriggered = false;
         int fixedAmount = 0;
-        
+
         foreach (FixedClickChance fixedChance in fixedChances)
         {
             if (Random.Range(0f, 1f) <= fixedChance.chance)
@@ -136,18 +144,21 @@ public class BrainClicker : MonoBehaviour
 
         // Use fixed amount if triggered, otherwise use normal click amount
         int finalAmount = fixedAmountTriggered ? fixedAmount : clickAmount;
-        
+
         brainRotCount += finalAmount;
         lifetimeBrainRot += finalAmount;
 
         // Record the time of this click
         clickTimes.Add(Time.time);
 
-        // Spawn animation with the final amount (green if fixed amount triggered)
+        // Spawn animation with the final amount (red if fixed amount triggered)
         SpawnClickAnimation(finalAmount, fixedAmountTriggered);
 
-        // Show random reaction face
-        if (reactionFace != null)
+        // Play click sound
+        PlayClickSound();
+
+        // Show random reaction face ONLY if it's active and enabled
+        if (reactionFace != null && reactionFace.gameObject.activeInHierarchy)
         {
             reactionFace.ShowRandomFace();
         }
@@ -171,7 +182,7 @@ public class BrainClicker : MonoBehaviour
                 textComponent.text = "+" + amount;
                 textComponent.fontSize = 40;
                 textComponent.fontStyle = FontStyles.Bold;
-                
+
                 // Make fixed amount clicks red
                 if (isFixedAmount)
                 {
@@ -224,7 +235,7 @@ public class BrainClicker : MonoBehaviour
     private int CalculateCurrentBPS()
     {
         int baseClickBPS = clickTimes.Count * clickMultiplier;
-        
+
         // Calculate average BPS from fixed chances
         float fixedChanceBPS = 0f;
         foreach (FixedClickChance fixedChance in fixedChances)
@@ -232,7 +243,7 @@ public class BrainClicker : MonoBehaviour
             fixedChanceBPS += fixedChance.fixedAmount * fixedChance.chance;
         }
         int averageFixedBPS = Mathf.RoundToInt(clickTimes.Count * fixedChanceBPS);
-        
+
         // Calculate what portion of clicks use fixed amounts vs normal amounts
         float totalFixedChance = 0f;
         foreach (FixedClickChance fixedChance in fixedChances)
@@ -240,19 +251,35 @@ public class BrainClicker : MonoBehaviour
             totalFixedChance += fixedChance.chance;
         }
         totalFixedChance = Mathf.Clamp01(totalFixedChance); // Cap at 100%
-        
+
         // Adjust base BPS for the chance that clicks are replaced by fixed amounts
         int adjustedBaseBPS = Mathf.RoundToInt(clickTimes.Count * clickMultiplier * (1f - totalFixedChance));
-        
+
         int totalBPS = adjustedBaseBPS + averageFixedBPS + passiveBPS + (passiveEvery7Seconds / 7);
-        
+
         if (justAddedSevenSecondBonus)
         {
             totalBPS += sevenSecondBonusAmount;
             justAddedSevenSecondBonus = false;
         }
-        
+
         return totalBPS;
+    }
+
+    // Method to play click sound
+    private void PlayClickSound()
+    {
+        // Play sound upgrades
+        foreach (SoundUpgrade soundUpgrade in soundUpgrades)
+        {
+            if (soundUpgrade != null && soundUpgrade.IsPurchased())
+            {
+                soundUpgrade.PlayClickSound();
+                return; // Only play one sound upgrade
+            }
+        }
+        
+        // No default sound - only play if there are purchased sound upgrades
     }
 
     // Method to increase click multiplier

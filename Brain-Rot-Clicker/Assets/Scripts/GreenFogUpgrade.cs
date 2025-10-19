@@ -3,7 +3,7 @@ using UnityEngine;
 public class GreenFogUpgrade : Upgrade
 {
     public ParticleSystem greenFogParticles;
-    private bool isActive = false;
+    //private bool isActive = false;
     
     void Start()
     {
@@ -19,7 +19,7 @@ public class GreenFogUpgrade : Upgrade
     
     protected override void ApplyUpgrade()
     {
-        isActive = true;
+        //isActive = true;
         
         // Add 1 to passive BPS - this will make BrainClicker add 1 brain rot every second
         if (brainClicker != null)
