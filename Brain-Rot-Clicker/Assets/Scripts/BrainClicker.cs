@@ -9,6 +9,7 @@ public class BrainClicker : MonoBehaviour
     public TextMeshProUGUI counterText;
     public TextMeshProUGUI bpsText;
     public GameObject clickTextPrefab; // Reference to your ClickTextAnimation prefab
+    public ReactionFace reactionFace; // Reference to the ReactionFace component
 
     private List<float> clickTimes = new List<float>();
     private float updateTimer = 0f;
@@ -129,6 +130,12 @@ public class BrainClicker : MonoBehaviour
 
         // Spawn animation
         SpawnClickAnimation();
+
+        // Show random reaction face (changes on every click)
+        if (reactionFace != null)
+        {
+            reactionFace.ShowRandomFace();
+        }
 
         // Start click animation
         StartCoroutine(ClickAnimation());
