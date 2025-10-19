@@ -8,8 +8,8 @@ public class BrainClicker : MonoBehaviour
     public int lifetimeBrainRot = 0;
     public TextMeshProUGUI counterText;
     public TextMeshProUGUI bpsText;
-    public GameObject clickTextPrefab; // Reference to your ClickTextAnimation prefab
-    public ReactionFace reactionFace; // Reference to the ReactionFace component
+    public GameObject clickTextPrefab;
+    public ReactionFace reactionFace;
 
     private List<float> clickTimes = new List<float>();
     private float updateTimer = 0f;
@@ -24,21 +24,40 @@ public class BrainClicker : MonoBehaviour
     private bool justAddedSevenSecondBonus = false;
     private int sevenSecondBonusAmount = 0;
 
+    // Click multiplier variables
+    private int clickMultiplier = 1;
+
+    // Fixed amount chance variables
+    private List<FixedClickChance> fixedChances = new List<FixedClickChance>();
+
     // Animation variables
     private Vector3 originalScale;
     private Vector3 hoverScale;
     private bool isAnimating = false;
     private bool isHovering = false;
 
-    // Animation settings (you can adjust these in the Inspector)
+    // Animation settings
     public float clickScaleFactor = 0.8f;
     public float hoverScaleFactor = 1.1f;
     public float clickAnimationDuration = 0.1f;
     public float hoverAnimationDuration = 0.2f;
 
+    // Class to track fixed amount chances
+    [System.Serializable]
+    public class FixedClickChance
+    {
+        public int fixedAmount;
+        public float chance;
+        
+        public FixedClickChance(int amount, float chancePercent)
+        {
+            fixedAmount = amount;
+            chance = chancePercent;
+        }
+    }
+
     void Start()
     {
-        // Store original scale and calculate hover scale
         originalScale = transform.localScale;
         hoverScale = originalScale * hoverScaleFactor;
         UpdateCounters();
@@ -68,7 +87,6 @@ public class BrainClicker : MonoBehaviour
             lifetimeBrainRot += passiveEvery7Seconds;
             sevenSecondTimer = 0f;
 
-            // Set flag to show the spike in BPS display
             justAddedSevenSecondBonus = true;
             sevenSecondBonusAmount = passiveEvery7Seconds;
 
@@ -80,36 +98,14 @@ public class BrainClicker : MonoBehaviour
 
         if (!hasStartedClicking && (clickTimes.Count > 0 || passiveBPS > 0 || passiveEvery7Seconds > 0))
         {
-            // Calculate BPS - if we just added the 7-second bonus, show the spike
-            if (justAddedSevenSecondBonus)
-            {
-                displayedBPS = clickTimes.Count + passiveBPS + sevenSecondBonusAmount;
-                // Reset the flag after showing it once
-                justAddedSevenSecondBonus = false;
-            }
-            else
-            {
-                displayedBPS = clickTimes.Count + passiveBPS + (passiveEvery7Seconds / 7);
-            }
-
+            displayedBPS = CalculateCurrentBPS();
             UpdateCounters();
             hasStartedClicking = true;
             updateTimer = 0f;
         }
         else if (updateTimer >= 0.5f)
         {
-            // Calculate BPS - if we just added the 7-second bonus, show the spike
-            if (justAddedSevenSecondBonus)
-            {
-                displayedBPS = clickTimes.Count + passiveBPS + sevenSecondBonusAmount;
-                // Reset the flag after showing it once
-                justAddedSevenSecondBonus = false;
-            }
-            else
-            {
-                displayedBPS = clickTimes.Count + passiveBPS + (passiveEvery7Seconds / 7);
-            }
-
+            displayedBPS = CalculateCurrentBPS();
             UpdateCounters();
             updateTimer = 0f;
 
@@ -122,16 +118,35 @@ public class BrainClicker : MonoBehaviour
 
     void OnMouseDown()
     {
-        brainRotCount += 1;
-        lifetimeBrainRot += 1;
+        int clickAmount = clickMultiplier;
+        
+        // Check for fixed amount chances (replace the click amount if triggered)
+        bool fixedAmountTriggered = false;
+        int fixedAmount = 0;
+        
+        foreach (FixedClickChance fixedChance in fixedChances)
+        {
+            if (Random.Range(0f, 1f) <= fixedChance.chance)
+            {
+                fixedAmountTriggered = true;
+                fixedAmount = fixedChance.fixedAmount;
+                break; // Only one fixed amount can trigger per click
+            }
+        }
+
+        // Use fixed amount if triggered, otherwise use normal click amount
+        int finalAmount = fixedAmountTriggered ? fixedAmount : clickAmount;
+        
+        brainRotCount += finalAmount;
+        lifetimeBrainRot += finalAmount;
 
         // Record the time of this click
         clickTimes.Add(Time.time);
 
-        // Spawn animation
-        SpawnClickAnimation();
+        // Spawn animation with the final amount (green if fixed amount triggered)
+        SpawnClickAnimation(finalAmount, fixedAmountTriggered);
 
-        // Show random reaction face (changes on every click)
+        // Show random reaction face
         if (reactionFace != null)
         {
             reactionFace.ShowRandomFace();
@@ -143,33 +158,32 @@ public class BrainClicker : MonoBehaviour
         UpdateCounters();
     }
 
-    void SpawnClickAnimation()
+    void SpawnClickAnimation(int amount, bool isFixedAmount)
     {
-        // Only spawn animation if the prefab is assigned (upgrade purchased)
         if (clickTextPrefab != null)
         {
-            // Instantiate the animation prefab
             GameObject animationInstance = Instantiate(clickTextPrefab, Vector3.zero, Quaternion.identity);
-
-            // Make sure the instance is enabled
             animationInstance.SetActive(true);
 
-            // Set the text
             TextMeshProUGUI textComponent = animationInstance.GetComponent<TextMeshProUGUI>();
             if (textComponent != null)
             {
-                textComponent.text = "+1";
+                textComponent.text = "+" + amount;
                 textComponent.fontSize = 40;
                 textComponent.fontStyle = FontStyles.Bold;
+                
+                // Make fixed amount clicks red
+                if (isFixedAmount)
+                {
+                    textComponent.color = Color.red;
+                }
             }
 
-            // Make sure it's visible in the Canvas
             Canvas canvas = FindObjectOfType<Canvas>();
             if (canvas != null)
             {
                 animationInstance.transform.SetParent(canvas.transform, false);
 
-                // Set random position above center: x from -250 to 250, y from 250 to 350
                 RectTransform rectTransform = animationInstance.GetComponent<RectTransform>();
                 if (rectTransform != null)
                 {
@@ -199,6 +213,61 @@ public class BrainClicker : MonoBehaviour
         }
     }
 
+    // Method to add fixed amount chance
+    public void AddChanceFixedClick(int amount, float chance)
+    {
+        fixedChances.Add(new FixedClickChance(amount, chance));
+        Debug.Log("Added fixed chance: " + amount + " with " + (chance * 100) + "% chance");
+    }
+
+    // Calculate BPS including fixed chance averages
+    private int CalculateCurrentBPS()
+    {
+        int baseClickBPS = clickTimes.Count * clickMultiplier;
+        
+        // Calculate average BPS from fixed chances
+        float fixedChanceBPS = 0f;
+        foreach (FixedClickChance fixedChance in fixedChances)
+        {
+            fixedChanceBPS += fixedChance.fixedAmount * fixedChance.chance;
+        }
+        int averageFixedBPS = Mathf.RoundToInt(clickTimes.Count * fixedChanceBPS);
+        
+        // Calculate what portion of clicks use fixed amounts vs normal amounts
+        float totalFixedChance = 0f;
+        foreach (FixedClickChance fixedChance in fixedChances)
+        {
+            totalFixedChance += fixedChance.chance;
+        }
+        totalFixedChance = Mathf.Clamp01(totalFixedChance); // Cap at 100%
+        
+        // Adjust base BPS for the chance that clicks are replaced by fixed amounts
+        int adjustedBaseBPS = Mathf.RoundToInt(clickTimes.Count * clickMultiplier * (1f - totalFixedChance));
+        
+        int totalBPS = adjustedBaseBPS + averageFixedBPS + passiveBPS + (passiveEvery7Seconds / 7);
+        
+        if (justAddedSevenSecondBonus)
+        {
+            totalBPS += sevenSecondBonusAmount;
+            justAddedSevenSecondBonus = false;
+        }
+        
+        return totalBPS;
+    }
+
+    // Method to increase click multiplier
+    public void IncreaseClickMultiplier(int amount)
+    {
+        clickMultiplier += amount;
+        Debug.Log("Click multiplier increased to: " + clickMultiplier);
+    }
+
+    // Method to get current click multiplier
+    public int GetClickMultiplier()
+    {
+        return clickMultiplier;
+    }
+
     // Click animation coroutine
     private System.Collections.IEnumerator ClickAnimation()
     {
@@ -207,7 +276,6 @@ public class BrainClicker : MonoBehaviour
         Vector3 targetScale = originalScale * clickScaleFactor;
         float elapsedTime = 0f;
 
-        // Scale down
         while (elapsedTime < clickAnimationDuration / 2f)
         {
             transform.localScale = Vector3.Lerp(originalScale, targetScale, elapsedTime / (clickAnimationDuration / 2f));
@@ -218,7 +286,6 @@ public class BrainClicker : MonoBehaviour
         transform.localScale = targetScale;
         elapsedTime = 0f;
 
-        // Scale back up
         Vector3 endScale = isHovering ? hoverScale : originalScale;
         while (elapsedTime < clickAnimationDuration / 2f)
         {
@@ -251,14 +318,12 @@ public class BrainClicker : MonoBehaviour
         isAnimating = false;
     }
 
-    // Public method to add passive BPS (every second)
     public void AddPassiveBPS(int amount)
     {
         passiveBPS += amount;
         UpdateCounters();
     }
 
-    // Public method to remove passive BPS (if needed)
     public void RemovePassiveBPS(int amount)
     {
         passiveBPS -= amount;
@@ -266,14 +331,12 @@ public class BrainClicker : MonoBehaviour
         UpdateCounters();
     }
 
-    // NEW: Public method to add passive brain rot every 7 seconds
     public void AddPassiveEvery7Seconds(int amount)
     {
         passiveEvery7Seconds += amount;
         UpdateCounters();
     }
 
-    // NEW: Public method to remove passive 7-second brain rot (if needed)
     public void RemovePassiveEvery7Seconds(int amount)
     {
         passiveEvery7Seconds -= amount;
@@ -281,7 +344,6 @@ public class BrainClicker : MonoBehaviour
         UpdateCounters();
     }
 
-    // Make this public so upgrades can call it
     public void UpdateCounters()
     {
         if (counterText != null)
@@ -294,7 +356,6 @@ public class BrainClicker : MonoBehaviour
         }
     }
 
-    // Public method for passive upgrades to add brain rot directly
     public void AddBrainRot(int amount)
     {
         brainRotCount += amount;
