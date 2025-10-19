@@ -4,7 +4,7 @@ public class NeonLightsUpgrade : Upgrade
 {
     [Header("Neon Lights Settings")]
     public GameObject neonLightsObject; // Reference to your neon lights GameObject
-    public int passiveBPSBonus = 3;
+    public int passiveBPSBonus = 2;
     
     void Start()
     {

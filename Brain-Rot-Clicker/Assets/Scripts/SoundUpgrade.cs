@@ -46,6 +46,9 @@ public class SoundUpgrade : Upgrade
                 BrainClicker.soundUpgrades.Add(this);
             }
         }
+        
+        // Play the sound when this upgrade is purchased
+        PlayClickSound();
     }
     
     // Public method that BrainClicker will call

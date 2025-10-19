@@ -52,10 +52,27 @@ public abstract class Upgrade : MonoBehaviour
         // Check current brain rot at purchase time to prevent going negative
         if (!isPurchased && brainClicker.lifetimeBrainRot >= cost && brainClicker.brainRotCount >= cost)
         {
+            // Play upgrade purchase sound from any purchased SoundUpgrade
+            PlayUpgradePurchaseSound();
+            
             brainClicker.brainRotCount -= cost;
             isPurchased = true;
             ApplyUpgrade();
             OnPurchaseComplete();
+        }
+    }
+    
+    // New method to play sound when purchasing upgrades
+    private void PlayUpgradePurchaseSound()
+    {
+        // Use the same sound system as brain clicks
+        foreach (SoundUpgrade soundUpgrade in BrainClicker.soundUpgrades)
+        {
+            if (soundUpgrade != null && soundUpgrade.IsPurchased())
+            {
+                soundUpgrade.PlayClickSound();
+                return; // Only play one sound
+            }
         }
     }
     

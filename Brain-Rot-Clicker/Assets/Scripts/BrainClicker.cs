@@ -46,17 +46,19 @@ public class BrainClicker : MonoBehaviour
     public float clickAnimationDuration = 0.1f;
     public float hoverAnimationDuration = 0.2f;
 
-    // Class to track fixed amount chances
+    // Class to track fixed amount chances with sound
     [System.Serializable]
     public class FixedClickChance
     {
         public int fixedAmount;
         public float chance;
+        public AudioSource bonusSound;
 
-        public FixedClickChance(int amount, float chancePercent)
+        public FixedClickChance(int amount, float chancePercent, AudioSource sound)
         {
             fixedAmount = amount;
             chance = chancePercent;
+            bonusSound = sound;
         }
     }
 
@@ -131,6 +133,7 @@ public class BrainClicker : MonoBehaviour
         // Check for fixed amount chances (replace the click amount if triggered)
         bool fixedAmountTriggered = false;
         int fixedAmount = 0;
+        AudioSource bonusSoundToPlay = null;
 
         foreach (FixedClickChance fixedChance in fixedChances)
         {
@@ -138,6 +141,7 @@ public class BrainClicker : MonoBehaviour
             {
                 fixedAmountTriggered = true;
                 fixedAmount = fixedChance.fixedAmount;
+                bonusSoundToPlay = fixedChance.bonusSound;
                 break; // Only one fixed amount can trigger per click
             }
         }
@@ -153,6 +157,12 @@ public class BrainClicker : MonoBehaviour
 
         // Spawn animation with the final amount (red if fixed amount triggered)
         SpawnClickAnimation(finalAmount, fixedAmountTriggered);
+
+        // Play bonus sound if fixed amount was triggered (using PlayOneShot for overlapping)
+        if (fixedAmountTriggered && bonusSoundToPlay != null && bonusSoundToPlay.clip != null)
+        {
+            bonusSoundToPlay.PlayOneShot(bonusSoundToPlay.clip);
+        }
 
         // Play click sound
         PlayClickSound();
@@ -224,10 +234,10 @@ public class BrainClicker : MonoBehaviour
         }
     }
 
-    // Method to add fixed amount chance
-    public void AddChanceFixedClick(int amount, float chance)
+    // Method to add fixed amount chance with sound
+    public void AddChanceFixedClick(int amount, float chance, AudioSource bonusSound)
     {
-        fixedChances.Add(new FixedClickChance(amount, chance));
+        fixedChances.Add(new FixedClickChance(amount, chance, bonusSound));
         Debug.Log("Added fixed chance: " + amount + " with " + (chance * 100) + "% chance");
     }
 

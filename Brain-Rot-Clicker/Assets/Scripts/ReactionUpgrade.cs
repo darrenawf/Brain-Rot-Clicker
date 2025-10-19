@@ -5,7 +5,7 @@ public class ReactionUpgrade : Upgrade
     [Header("Visual Object")]
     public GameObject objectToShow; // This should be the ReactionFace object
     
-    private int clickBonus = 2;
+    private int clickBonus = 1;
     private ReactionFace reactionFace;
     
     void Start()
