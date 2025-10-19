@@ -8,7 +8,7 @@ public class UpgradePanelManager : MonoBehaviour
     public Transform upgradesPanel;
     public Vector2 firstButtonPosition = new Vector2(0, 0);
     public Vector2 buttonSize = new Vector2(150, 150);
-    public float buttonSpacing = 160f;
+    public float buttonSpacing = 200f;
     public int maxVisibleUpgrades = 5;
     
     private List<Upgrade> allUpgrades = new List<Upgrade>();
@@ -94,16 +94,17 @@ public class UpgradePanelManager : MonoBehaviour
         RectTransform rectTransform = button.GetComponent<RectTransform>();
         if (rectTransform != null)
         {
-            // Calculate the total width of all buttons
-            float totalWidth = (totalUpgrades - 1) * buttonSpacing;
+            // Calculate the total height of all buttons
+            float totalHeight = (totalUpgrades - 1) * buttonSpacing;
             
-            // Calculate the starting X position to center the group
-            float startX = -totalWidth / 2f;
+            // Calculate the starting Y position (top of the screen)
+            float startY = totalHeight / 2f;
             
-            // Calculate the X position for this button
-            float xPos = startX + (buttonSpacing * index);
+            // Calculate the Y position for this button (cheapest on top, going downward)
+            float yPos = startY - (buttonSpacing * index);
             
-            Vector2 position = new Vector2(xPos, firstButtonPosition.y);
+            // Position on the right side of the screen
+            Vector2 position = new Vector2(firstButtonPosition.x, yPos);
             
             rectTransform.anchoredPosition = position;
             rectTransform.sizeDelta = buttonSize;

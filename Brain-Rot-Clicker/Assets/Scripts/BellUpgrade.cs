@@ -10,7 +10,7 @@ public class BellUpgrade : Upgrade
     void Start()
     {
         upgradeName = "Bell Upgrade";
-        cost = 800;
+        cost = 500;
         
         // Auto-find the BrainClicker if not set
         if (brainClicker == null)

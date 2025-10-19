@@ -11,7 +11,7 @@ public class ReactionUpgrade : Upgrade
     void Start()
     {
         upgradeName = "Reaction Upgrade";
-        cost = 250;
+        cost = 200;
         
         // Auto-find the BrainClicker if not set
         if (brainClicker == null)

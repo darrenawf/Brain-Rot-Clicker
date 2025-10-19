@@ -25,6 +25,10 @@ public class BrainClicker : MonoBehaviour
     private bool justAddedTenSecondBonus = false;
     private int tenSecondBonusAmount = 0;
 
+    // Track when to show the spike
+    private float spikeDisplayTime = 0f;
+    private bool showingSpike = false;
+
     // Bell upgrade system
     private List<BellUpgrade> bellUpgrades = new List<BellUpgrade>();
 
@@ -103,10 +107,21 @@ public class BrainClicker : MonoBehaviour
             justAddedTenSecondBonus = true;
             tenSecondBonusAmount = passiveEvery10Seconds;
 
+            // Start showing the spike for 1 second
+            showingSpike = true;
+            spikeDisplayTime = Time.time;
+
             // Play bell sounds for all purchased bell upgrades
             PlayBellSounds();
 
             UpdateCounters();
+        }
+
+        // Check if we should stop showing the spike
+        if (showingSpike && Time.time - spikeDisplayTime >= 1f)
+        {
+            showingSpike = false;
+            justAddedTenSecondBonus = false;
         }
 
         // Update BPS display every 0.5 seconds
@@ -268,7 +283,7 @@ public class BrainClicker : MonoBehaviour
         }
     }
 
-    // Calculate BPS including fixed chance averages
+    // Calculate BPS - show spike only when bonus triggers
     private int CalculateCurrentBPS()
     {
         int baseClickBPS = clickTimes.Count * clickMultiplier;
@@ -292,16 +307,20 @@ public class BrainClicker : MonoBehaviour
         // Adjust base BPS for the chance that clicks are replaced by fixed amounts
         int adjustedBaseBPS = Mathf.RoundToInt(clickTimes.Count * clickMultiplier * (1f - totalFixedChance));
 
-        // Include 10-second passive in BPS calculation (divided by 10 instead of 7)
-        int totalBPS = adjustedBaseBPS + averageFixedBPS + passiveBPS + (passiveEvery10Seconds / 10);
+        // Base BPS without 10-second bonus
+        int baseBPS = adjustedBaseBPS + averageFixedBPS + passiveBPS;
 
-        if (justAddedTenSecondBonus)
+        // Only show the spike for 1 second after the bonus triggers
+        if (showingSpike)
         {
-            totalBPS += tenSecondBonusAmount;
-            justAddedTenSecondBonus = false;
+            // Show base BPS + the full bonus amount
+            return baseBPS + tenSecondBonusAmount;
         }
-
-        return totalBPS;
+        else
+        {
+            // Normal display: just the continuous BPS
+            return baseBPS;
+        }
     }
 
     // Method to play click sound

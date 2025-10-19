@@ -8,7 +8,7 @@ public class LofiMusicUpgrade : Upgrade
     void Start()
     {
         upgradeName = "Lofi Music";
-        cost = 400;
+        cost = 250;
         
         // Auto-find the BrainClicker if not set
         if (brainClicker == null)
@@ -48,7 +48,7 @@ public class LofiMusicUpgrade : Upgrade
         // Add +3 passive brain rot per second
         if (brainClicker != null)
         {
-            brainClicker.AddPassiveBPS(3);
+            brainClicker.AddPassiveBPS(2);
         }
         
         // Start playing the lofi music
